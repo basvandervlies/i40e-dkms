@@ -1,3 +1,5 @@
+patch is not needed since linux-image-2.18.9-amd64
+
 we have added a patch for debian 10.  If you use the standard debian 10 kernel,eg:
  * linux-image-4.19.0-17-amd64
 
@@ -7,6 +9,6 @@ In debian release 10.11 the default kernel is:
 In this kernel there are some backports from kernel 5.4.0 and the driver does not
 compile anymore. SURF included a simple patch to fix this:
  * cd src
- * patch < ../debian10.patch
+ * patch < ../debian_10.patch
 
 This  patch compiles for old and new debian kernels

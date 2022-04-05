@@ -1,5 +1,5 @@
 # SPDX-License-Identifier: GPL-2.0
-# Copyright(c) 2013 - 2021 Intel Corporation.
+# Copyright(c) 2013 - 2022 Intel Corporation.
 
 ifneq ($(KERNELRELEASE),)
 # kbuild part of makefile
@@ -10,10 +10,11 @@ ifneq ($(KERNELRELEASE),)
 ccflags-y += -I$(src)
 subdir-ccflags-y += -I$(src)
 
-obj-$(CONFIG_I40E) += i40e.o
+obj-m += i40e.o
 
 i40e-y := i40e_main.o \
 	i40e_ethtool.o \
+	i40e_xsk.o \
 	i40e_adminq.o \
 	i40e_common.o \
 	i40e_hmc.o \
@@ -31,6 +32,11 @@ i40e-y := i40e_main.o \
 i40e-$(CONFIG_DCB) += i40e_dcb.o i40e_dcb_nl.o
 i40e-y += kcompat.o
 i40e-y += kcompat_vfd.o
+
+ifeq (${NEED_AUX_BUS},2)
+obj-m += auxiliary.o
+$(warning ${NEED_AUX_BUS})
+endif
 
 else	# ifneq($(KERNELRELEASE),)
 # normal makefile
@@ -107,6 +113,7 @@ mandocs_install: manfile
 modules_install: default
 	@echo "Installing modules..."
 	@+$(call kernelbuild,modules_install)
+	${auxiliary_post_install}
 
 # After installing all the files, perform necessary work to ensure the system
 # will use the new modules. This includes running depmod to update module
@@ -125,6 +132,7 @@ mandocs_uninstall:
 	if [ -e ${INSTALL_MOD_PATH}${MANDIR}/man${MANSECTION}/${DRIVER}.${MANSECTION}.gz ] ; then \
 		rm -f ${INSTALL_MOD_PATH}${MANDIR}/man${MANSECTION}/${DRIVER}.${MANSECTION}.gz ; \
 	fi;
+	${auxiliary_post_uninstall}
 
 # Remove installed module files. This target is called by the RPM specfile when
 # generating binary RPMs, and is not expected to modify files outside of the
@@ -139,6 +147,12 @@ uninstall: modules_uninstall mandocs_uninstall
 	$(call cmd_depmod)
 	$(call cmd_initramfs)
 
+auxiliary_info:
+	@../scripts/check_aux_bus --verbose --ksrc="${KSRC}" --build-kernel="${BUILD_KERNEL}"
+
+ifeq (${NEED_AUX_BUS},1)
+default: auxiliary_info
+endif
 ########
 # Help #
 ########
@@ -164,6 +178,7 @@ help:
 	@echo '  modules_uninstall   - uninstall the module(s) only'
 	@echo '  mandocs_uninstall   - uninstall the manpage only'
 	@echo '  uninstall           - Uninstall the module(s) and manpage, and update initramfs'
+	@echo '  auxiliary_info      - Print information about the auxiliary module'
 	@echo '  help                - Display this help message'
 	@echo ''
 	@echo 'Variables:'
@@ -176,6 +191,6 @@ help:
 	@echo ' Other variables may be available for tuning make process, see'
 	@echo ' Kernel Kbuild documentation for more information'
 
-.PHONY: default noisy clean manfile silent sparse ccc install uninstall help
+.PHONY: default noisy clean manfile silent sparse ccc install uninstall help auxiliary_info
 
 endif	# ifneq($(KERNELRELEASE),)
