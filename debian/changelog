@@ -1,8 +1,8 @@
-i40e-dkms (2.17.4-1) UNRELEASED; urgency=medium
+i40e-dkms (2.18.9-1) UNRELEASED; urgency=medium
 
-  * New upstream release 2.17.4
+  * New upstream release 2.18.9
 
- -- Bas van der Vlies <=bas.vandervlies@surf.nl>  Wed, 10 Nov 2021 16:16:43 +0100
+ -- Jaap Dijkshoorn <jaap.dijkshoorn@surf.nl>  Tue, 05 Apr 2022 10:13:22 +0200
 
 i40e-dkms (2.7.12-1) unstable; urgency=medium
 
